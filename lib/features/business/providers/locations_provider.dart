@@ -70,7 +70,7 @@ class LocationsNotifier extends StateNotifier<LocationsState> {
       );
 
       if (_httpClient.isSuccessful(response)) {
-        final data = _httpClient.parseResponse(response);
+        final data = _httpClient.parseResponseDynamic(response);
         if (data != null && data is List) {
           final locations = (data as List)
               .map((json) => Location.fromJson(json as Map<String, dynamic>))

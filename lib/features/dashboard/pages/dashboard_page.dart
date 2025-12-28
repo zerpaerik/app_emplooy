@@ -18,6 +18,7 @@ import '../../clockout/providers/clockout_provider.dart';
 import '../../workers/pages/workers_list_page.dart';
 import '../../workday_reports/pages/workday_reports_list_page.dart';
 import '../../workday_reports/pages/workday_report_form_page.dart';
+import '../../projects/pages/projects_list_page.dart';
 import '../../user/models/user_model.dart';
 
 // Temporary localization class
@@ -602,7 +603,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         title: 'Projects',
         onTap: () {
           Navigator.pop(context);
-          // TODO: Navegar a proyectos
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ProjectsListPage(),
+            ),
+          );
         },
       ));
       
@@ -611,7 +617,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         title: 'Contracts',
         onTap: () {
           Navigator.pop(context);
-          // TODO: Navegar a contratos
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Contracts list - Select from Projects first'),
+            ),
+          );
         },
       ));
       

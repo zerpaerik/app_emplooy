@@ -62,7 +62,7 @@ class ProjectsNotifier extends StateNotifier<ProjectsState> {
       );
 
       if (_httpClient.isSuccessful(response)) {
-        final data = _httpClient.parseResponse(response);
+        final data = _httpClient.parseResponseDynamic(response);
         if (data != null && data is List) {
           final projects = (data as List)
               .map((json) => Project.fromJson(json as Map<String, dynamic>))

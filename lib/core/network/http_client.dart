@@ -190,11 +190,22 @@ class HttpClient {
     return response.statusCode >= 200 && response.statusCode < 300;
   }
 
-  /// Parsear respuesta JSON
+  /// Parsear respuesta JSON como Map
   Map<String, dynamic>? parseResponse(http.Response response) {
     try {
       if (response.body.isEmpty) return null;
       return jsonDecode(response.body) as Map<String, dynamic>;
+    } catch (e) {
+      print('[HttpClient] Error parsing response: $e');
+      return null;
+    }
+  }
+
+  /// Parsear respuesta JSON (puede ser Map o List)
+  dynamic parseResponseDynamic(http.Response response) {
+    try {
+      if (response.body.isEmpty) return null;
+      return jsonDecode(response.body);
     } catch (e) {
       print('[HttpClient] Error parsing response: $e');
       return null;

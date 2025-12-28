@@ -55,7 +55,7 @@ class BusinessNotifier extends StateNotifier<BusinessState> {
 
       final statusFilter = status ?? state.selectedStatus;
       final response = await _httpClient.get(
-        '/api/v-1/business/metrics?status=$statusFilter',
+        '/api/v-2/user/business-metrics/$statusFilter',
         requiresAuth: true,
       );
 
