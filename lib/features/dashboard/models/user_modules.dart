@@ -72,6 +72,7 @@ class DefaultModules {
         );
       case 'supervisor':
       case 'is_lead':
+      case 'lead':
         return const UserModules(
           clockInModule: true,
           clockOutModule: true,

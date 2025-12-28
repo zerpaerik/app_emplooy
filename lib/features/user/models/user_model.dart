@@ -169,7 +169,8 @@ class UserModel {
   /// Determina si el usuario es business basado en el rol y location_list
   bool get isBusiness {
     return role == 'business' || 
-           (role != 'business' && locationList.isNotEmpty);
+           role == 'customer' || 
+           locationList.isNotEmpty;
   }
 
   /// Obtiene el nombre completo del usuario

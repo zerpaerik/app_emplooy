@@ -590,14 +590,66 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   List<Widget> _buildRoleSpecificOptions(modules, user) {
     List<Widget> options = [];
 
-    // Worker: solo settings (ya se muestra abajo)
+    // Worker: mostrar solo módulos activos del endpoint
     if (modules.role == 'worker') {
-      // No opciones adicionales, solo settings
-      return options;
+      if (modules.clockInModule) {
+        options.add(_buildDrawerItem(
+          icon: Icons.login,
+          title: 'Clock In',
+          onTap: () async {
+            Navigator.pop(context);
+            await _handleClockInNavigation(context, user);
+          },
+        ));
+      }
+      
+      if (modules.clockOutModule) {
+        options.add(_buildDrawerItem(
+          icon: Icons.logout,
+          title: 'Clock Out',
+          onTap: () async {
+            Navigator.pop(context);
+            await _handleClockOutNavigation(context, user);
+          },
+        ));
+      }
+      
+      if (modules.expensesModule) {
+        options.add(_buildDrawerItem(
+          icon: Icons.attach_money,
+          title: 'Expenses',
+          onTap: () {
+            Navigator.pop(context);
+            // TODO: Navegar a expenses
+          },
+        ));
+      }
+      
+      if (modules.warningsModule) {
+        options.add(_buildDrawerItem(
+          icon: Icons.warning,
+          title: 'Warnings',
+          onTap: () {
+            Navigator.pop(context);
+            // TODO: Navegar a warnings
+          },
+        ));
+      }
+      
+      if (modules.workdayReportsModule) {
+        options.add(_buildDrawerItem(
+          icon: Icons.assessment,
+          title: 'Workday Reports',
+          onTap: () async {
+            Navigator.pop(context);
+            await _handleWorkdayReportsNavigation(context, user);
+          },
+        ));
+      }
     }
 
-    // Supervisor: clock-in, clock-out, workers, workday reports
-    if (modules.role == 'supervisor' || modules.role == 'is_lead') {
+    // Supervisor: todos los módulos excepto business
+    if (modules.role == 'supervisor' || modules.role == 'is_lead' || modules.role == 'lead') {
       if (modules.clockInModule) {
         options.add(_buildDrawerItem(
           icon: Icons.login,
@@ -634,6 +686,28 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         },
       ));
       
+      if (modules.expensesModule) {
+        options.add(_buildDrawerItem(
+          icon: Icons.attach_money,
+          title: 'Expenses',
+          onTap: () {
+            Navigator.pop(context);
+            // TODO: Navegar a expenses
+          },
+        ));
+      }
+      
+      if (modules.warningsModule) {
+        options.add(_buildDrawerItem(
+          icon: Icons.warning,
+          title: 'Warnings',
+          onTap: () {
+            Navigator.pop(context);
+            // TODO: Navegar a warnings
+          },
+        ));
+      }
+      
       if (modules.workdayReportsModule) {
         options.add(_buildDrawerItem(
           icon: Icons.assessment,
@@ -646,8 +720,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       }
     }
 
-    // Business: proyectos, contratos
-    if (modules.role == 'business' || modules.role == 'customer') {
+    // Business/Customer: proyectos, contratos + módulos activos del endpoint
+    if (modules.role == 'business' || modules.role == 'customer' || (user != null && user.locationList.isNotEmpty)) {
       options.add(_buildDrawerItem(
         icon: Icons.business,
         title: 'Projects',
@@ -665,6 +739,29 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           // TODO: Navegar a contratos
         },
       ));
+      
+      // Mostrar módulos activos del endpoint si los tiene
+      if (modules.clockInModule) {
+        options.add(_buildDrawerItem(
+          icon: Icons.login,
+          title: 'Clock In',
+          onTap: () async {
+            Navigator.pop(context);
+            await _handleClockInNavigation(context, user);
+          },
+        ));
+      }
+      
+      if (modules.clockOutModule) {
+        options.add(_buildDrawerItem(
+          icon: Icons.logout,
+          title: 'Clock Out',
+          onTap: () async {
+            Navigator.pop(context);
+            await _handleClockOutNavigation(context, user);
+          },
+        ));
+      }
     }
 
     if (options.isNotEmpty) {
