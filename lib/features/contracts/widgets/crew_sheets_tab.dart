@@ -94,84 +94,196 @@ class CrewSheetsTab extends ConsumerWidget {
   }
 
   Widget _buildCurrentCrewCard(BuildContext context, WidgetRef ref, crew) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: AppColors.primary, width: 2),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header con icono y título
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.05),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(14),
+                topRight: Radius.circular(14),
+              ),
+            ),
+            child: Row(
               children: [
-                Icon(Icons.access_time, color: AppColors.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Active Crew Sheet',
-                  style: AppTextStyles.h3.copyWith(
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
                     color: AppColors.primary,
-                    fontWeight: FontWeight.bold,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.access_time,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Active Crew Sheet',
+                    style: AppTextStyles.h3.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.success,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'ACTIVE',
+                    style: AppTextStyles.caption.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            _buildInfoRow('Date', crew.date),
-            if (crew.entryTime != null)
-              _buildInfoRow('Entry Time', crew.entryTime!),
-            if (crew.exitTime != null)
-              _buildInfoRow('Exit Time', crew.exitTime!),
-            _buildInfoRow('Workers', '${crew.workersCount}'),
-            _buildInfoRow('Status', crew.status),
-            const SizedBox(height: 16),
+          ),
 
-            // Action Buttons
-            if (!crew.isCheckInFinished)
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final success = await ref.read(crewProvider.notifier).endCheckIn(crew.id);
-                    if (success && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('Check-in finished successfully'),
-                          backgroundColor: AppColors.success,
+          // Información del crew
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                _buildEnhancedInfoRow(
+                  icon: Icons.calendar_today,
+                  label: 'Date',
+                  value: crew.date ?? 'N/A',
+                  valueColor: AppColors.textDark,
+                ),
+                const SizedBox(height: 12),
+                _buildEnhancedInfoRow(
+                  icon: Icons.people,
+                  label: 'Workers',
+                  value: '${crew.workersCount ?? 0}',
+                  valueColor: AppColors.primary,
+                  isHighlight: true,
+                ),
+                const SizedBox(height: 12),
+                if (crew.entryTime != null) ...[
+                  _buildEnhancedInfoRow(
+                    icon: Icons.login,
+                    label: 'Entry Time',
+                    value: crew.entryTime!,
+                    valueColor: AppColors.success,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                if (crew.exitTime != null) ...[
+                  _buildEnhancedInfoRow(
+                    icon: Icons.logout,
+                    label: 'Exit Time',
+                    value: crew.exitTime!,
+                    valueColor: AppColors.error,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                _buildEnhancedInfoRow(
+                  icon: Icons.info_outline,
+                  label: 'Status',
+                  value: crew.status ?? 'Active',
+                  valueColor: AppColors.textDark,
+                ),
+              ],
+            ),
+          ),
+
+          // Action Buttons
+          if (!crew.isCheckInFinished || crew.canStartCheckOut)
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                children: [
+                  const Divider(height: 1),
+                  const SizedBox(height: 16),
+                  if (!crew.isCheckInFinished)
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          final success = await ref.read(crewProvider.notifier).endCheckIn(crew.id);
+                          if (success && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('Check-in finished successfully'),
+                                backgroundColor: AppColors.success,
+                              ),
+                            );
+                            ref.read(crewProvider.notifier).fetchCurrentCrew();
+                          }
+                        },
+                        icon: const Icon(Icons.check_circle, size: 20),
+                        label: const Text(
+                          'Finish Check-in',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
-                      );
-                      ref.read(crewProvider.notifier).fetchCurrentCrew();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.success,
-                  ),
-                  child: const Text('Finish Check-in'),
-                ),
-              ),
-            if (crew.canStartCheckOut)
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: Start check-out
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Start Check-out - Coming soon'),
-                        backgroundColor: AppColors.primary,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.success,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
                       ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                  ),
-                  child: const Text('Start Check-out'),
-                ),
+                    ),
+                  if (crew.canStartCheckOut) ...[
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('Start Check-out - Coming soon'),
+                              backgroundColor: AppColors.primary,
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.logout, size: 20),
+                        label: const Text(
+                          'Start Check-out',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: BorderSide(color: AppColors.primary, width: 2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
@@ -228,6 +340,51 @@ class CrewSheetsTab extends ConsumerWidget {
           Text(
             value,
             style: AppTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEnhancedInfoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color valueColor,
+    bool isHighlight = false,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isHighlight ? AppColors.primary.withOpacity(0.05) : Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isHighlight ? AppColors.primary.withOpacity(0.2) : Colors.grey.shade200,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 20,
+            color: isHighlight ? AppColors.primary : AppColors.textGrey,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              label,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textDark,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: AppTextStyles.bodyLarge.copyWith(
+              color: valueColor,
               fontWeight: FontWeight.bold,
             ),
           ),
