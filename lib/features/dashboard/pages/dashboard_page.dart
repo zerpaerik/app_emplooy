@@ -590,8 +590,32 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   List<Widget> _buildRoleSpecificOptions(modules, user) {
     List<Widget> options = [];
 
-    // Worker: mostrar solo módulos activos del endpoint
-    if (modules.role == 'worker') {
+    // Determinar si el usuario es business (prioridad: locationList > role)
+    final isBusiness = user != null && (user.locationList.isNotEmpty || 
+                       modules.role == 'business' || 
+                       modules.role == 'customer');
+
+    // Si es business, mostrar solo opciones de business (evitar duplicación)
+    if (isBusiness) {
+      options.add(_buildDrawerItem(
+        icon: Icons.business,
+        title: 'Projects',
+        onTap: () {
+          Navigator.pop(context);
+          // TODO: Navegar a proyectos
+        },
+      ));
+      
+      options.add(_buildDrawerItem(
+        icon: Icons.description,
+        title: 'Contracts',
+        onTap: () {
+          Navigator.pop(context);
+          // TODO: Navegar a contratos
+        },
+      ));
+      
+      // Mostrar módulos activos del endpoint si los tiene
       if (modules.clockInModule) {
         options.add(_buildDrawerItem(
           icon: Icons.login,
@@ -613,43 +637,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           },
         ));
       }
-      
-      if (modules.expensesModule) {
-        options.add(_buildDrawerItem(
-          icon: Icons.attach_money,
-          title: 'Expenses',
-          onTap: () {
-            Navigator.pop(context);
-            // TODO: Navegar a expenses
-          },
-        ));
-      }
-      
-      if (modules.warningsModule) {
-        options.add(_buildDrawerItem(
-          icon: Icons.warning,
-          title: 'Warnings',
-          onTap: () {
-            Navigator.pop(context);
-            // TODO: Navegar a warnings
-          },
-        ));
-      }
-      
-      if (modules.workdayReportsModule) {
-        options.add(_buildDrawerItem(
-          icon: Icons.assessment,
-          title: 'Workday Reports',
-          onTap: () async {
-            Navigator.pop(context);
-            await _handleWorkdayReportsNavigation(context, user);
-          },
-        ));
-      }
     }
-
-    // Supervisor: todos los módulos excepto business
-    if (modules.role == 'supervisor' || modules.role == 'is_lead' || modules.role == 'lead') {
+    // Si es supervisor (y NO es business), mostrar opciones de supervisor
+    else if (modules.role == 'supervisor' || modules.role == 'is_lead' || modules.role == 'lead') {
       if (modules.clockInModule) {
         options.add(_buildDrawerItem(
           icon: Icons.login,
@@ -719,28 +709,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         ));
       }
     }
-
-    // Business/Customer: proyectos, contratos + módulos activos del endpoint
-    if (modules.role == 'business' || modules.role == 'customer' || (user != null && user.locationList.isNotEmpty)) {
-      options.add(_buildDrawerItem(
-        icon: Icons.business,
-        title: 'Projects',
-        onTap: () {
-          Navigator.pop(context);
-          // TODO: Navegar a proyectos
-        },
-      ));
-      
-      options.add(_buildDrawerItem(
-        icon: Icons.description,
-        title: 'Contracts',
-        onTap: () {
-          Navigator.pop(context);
-          // TODO: Navegar a contratos
-        },
-      ));
-      
-      // Mostrar módulos activos del endpoint si los tiene
+    // Si es worker, mostrar solo módulos activos del endpoint
+    else if (modules.role == 'worker') {
       if (modules.clockInModule) {
         options.add(_buildDrawerItem(
           icon: Icons.login,
@@ -759,6 +729,39 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           onTap: () async {
             Navigator.pop(context);
             await _handleClockOutNavigation(context, user);
+          },
+        ));
+      }
+      
+      if (modules.expensesModule) {
+        options.add(_buildDrawerItem(
+          icon: Icons.attach_money,
+          title: 'Expenses',
+          onTap: () {
+            Navigator.pop(context);
+            // TODO: Navegar a expenses
+          },
+        ));
+      }
+      
+      if (modules.warningsModule) {
+        options.add(_buildDrawerItem(
+          icon: Icons.warning,
+          title: 'Warnings',
+          onTap: () {
+            Navigator.pop(context);
+            // TODO: Navegar a warnings
+          },
+        ));
+      }
+      
+      if (modules.workdayReportsModule) {
+        options.add(_buildDrawerItem(
+          icon: Icons.assessment,
+          title: 'Workday Reports',
+          onTap: () async {
+            Navigator.pop(context);
+            await _handleWorkdayReportsNavigation(context, user);
           },
         ));
       }
