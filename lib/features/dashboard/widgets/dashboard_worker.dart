@@ -268,7 +268,7 @@ class _DashboardWorkerState extends ConsumerState<DashboardWorker> with WidgetsB
 
             // Ready to Work Card
             _buildReadyToWorkCard(user),
-            const SizedBox(height: 20),
+            const SizedBox(height: 100), // Padding extra para asegurar scroll completo
           ],
         ),
       ),

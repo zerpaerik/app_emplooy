@@ -103,7 +103,12 @@ class _ClockoutWorkerDetailPageState extends ConsumerState<ClockoutWorkerDetailP
   }
 
   void _navigateBackToScanner() {
-    Navigator.pushReplacement(
+    // Limpiar todo el stack de navegación y regresar al scanner
+    // Esto evita que se acumulen múltiples rutas en el stack
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    
+    // Luego navegar al scanner con una nueva ruta limpia
+    Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ClockoutScannerPage(
